@@ -9,6 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tiptap/extension-highlight": "^3.13.0",
+    "@tiptap/extension-typography": "^3.13.0",
+    "@tiptap/extensions": "^3.13.0",
+    "@tiptap/markdown": "^3.13.0",
     "@tiptap/pm": "^3.12.1",
     "@tiptap/react": "^3.12.1",
     "@tiptap/starter-kit": "^3.12.1",
