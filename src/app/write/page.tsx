@@ -1,6 +1,8 @@
-import ContentEditor from "@/features/editor/ui/ContentEditor";
-import ContentPreview from "@/features/editor/ui/ContentPreview";
-import PostTitleInput from "@/features/editor/ui/PostTitleInput";
+import {
+  ContentEditor,
+  ContentPreview,
+  PostTitleInput,
+} from "@/features/editor";
 import Divider from "@/shared/ui/Divider";
 
 export default function Write() {
@@ -11,9 +13,7 @@ export default function Write() {
         <Divider />
         <ContentEditor />
       </div>
-      <div>
-        <ContentPreview />
-      </div>
+      <ContentPreview />
     </div>
   );
 }
