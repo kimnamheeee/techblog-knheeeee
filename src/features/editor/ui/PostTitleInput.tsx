@@ -1,16 +1,14 @@
+"use client";
+
 import { cn } from "@/shared/lib/utils";
+import { useEditorStore } from "../model/editorStore";
 
 interface PostTitleInputProps {
   className?: string;
-  value?: string;
-  onChange?: (value: string) => void;
 }
 
-export default function PostTitleInput({
-  className,
-  value,
-  onChange,
-}: PostTitleInputProps) {
+export default function PostTitleInput({ className }: PostTitleInputProps) {
+  const { title, setTitle } = useEditorStore();
   return (
     <input
       type="text"
@@ -19,8 +17,8 @@ export default function PostTitleInput({
         "border-none outline-none font-black p-0 h-auto text-4xl",
         className
       )}
-      value={value}
-      onChange={onChange}
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
     />
   );
 }
