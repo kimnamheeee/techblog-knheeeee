@@ -12,6 +12,7 @@ export default function PreviewTab() {
   const editor = useEditor({
     extensions: [StarterKit, Markdown],
     immediatelyRender: false,
+    editable: false,
   });
 
   useEffect(() => {
