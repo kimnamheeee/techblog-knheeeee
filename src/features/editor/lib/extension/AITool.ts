@@ -1,5 +1,4 @@
 import { Editor, Extension } from "@tiptap/core";
-import { diffToHtml } from "../diffText";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -16,6 +15,7 @@ declare module "@tiptap/core" {
       diffHtml: string | null;
       originalText: string | null;
       improvedText: string | null;
+      range: { from: number; to: number } | null;
     };
   }
 }
@@ -25,11 +25,11 @@ export const AITool = Extension.create({
 
   addStorage() {
     return {
-      status: "idle",
-      diffHtml: null,
-      originalText: null,
-      improvedText: null,
-      range: null,
+      status: "idle" as "idle" | "loading" | "result",
+      diffHtml: null as string | null,
+      originalText: null as string | null,
+      improvedText: null as string | null,
+      range: null as { from: number; to: number } | null,
     };
   },
 
@@ -38,41 +38,16 @@ export const AITool = Extension.create({
       improveSelection:
         () =>
         ({ editor }: { editor: Editor }) => {
-          (async () => {
-            const { from, to } = editor.state.selection;
-            const selected = editor.state.doc.textBetween(from, to, "");
+          const { from, to } = editor.state.selection;
+          const selected = editor.state.doc.textBetween(from, to, "");
 
-            if (!selected) return;
+          if (!selected) return false;
 
-            editor.storage.aiTool.status = "loading";
-
-            editor.storage.aiTool.originalText = selected;
-            editor.storage.aiTool.diffHtml = null;
-
-            const improvedText = await fetch("/api/editor/improve", {
-              method: "POST",
-              body: JSON.stringify({ text: selected }),
-            })
-              .then((r) => r.json())
-              .then((r) => r.improvedText);
-
-            if (!improvedText) return;
-            const diffHtml = diffToHtml(selected, improvedText);
-
-            editor
-              .chain()
-              .focus()
-              .deleteSelection()
-              .insertContent(diffHtml)
-              .run();
-
-            const end = editor.state.selection.$to.pos;
-            editor.commands.setTextSelection({ from, to: end });
-
-            editor.storage.aiTool.status = "result";
-            editor.storage.aiTool.diffHtml = diffHtml;
-            editor.storage.aiTool.improvedText = improvedText;
-          })();
+          editor.storage.aiTool.status = "loading";
+          editor.storage.aiTool.originalText = selected;
+          editor.storage.aiTool.diffHtml = null;
+          editor.storage.aiTool.improvedText = null;
+          editor.storage.aiTool.range = { from, to };
 
           return true;
         },
@@ -81,22 +56,27 @@ export const AITool = Extension.create({
         () =>
         ({ editor }: { editor: Editor }) => {
           const improvedText = editor.storage.aiTool.improvedText;
+          const range = editor.storage.aiTool.range;
 
-          if (!improvedText) return false;
+          if (!improvedText || !range) return false;
+          if (!editor.view) return false;
 
-          const { from, to } = editor.state.selection;
+          const state = editor.view.state;
 
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .deleteSelection()
-            .insertContent(improvedText)
-            .run();
+          let tr = state.tr;
+          tr = tr.replaceWith(
+            range.from,
+            range.to,
+            state.schema.text(improvedText)
+          );
+
+          editor.view.dispatch(tr);
 
           editor.storage.aiTool.status = "idle";
           editor.storage.aiTool.diffHtml = null;
+          editor.storage.aiTool.originalText = null;
           editor.storage.aiTool.improvedText = null;
+          editor.storage.aiTool.range = null;
 
           return true;
         },
@@ -105,13 +85,27 @@ export const AITool = Extension.create({
         () =>
         ({ editor }: { editor: Editor }) => {
           const originalText = editor.storage.aiTool.originalText;
-          if (!originalText) return false;
+          const range = editor.storage.aiTool.range;
 
-          editor.chain().focus().insertContent(originalText).run();
+          if (!originalText || !range) return false;
+          if (!editor.view) return false;
+
+          const state = editor.view.state;
+
+          let tr = state.tr;
+          tr = tr.replaceWith(
+            range.from,
+            range.to,
+            state.schema.text(originalText)
+          );
+
+          editor.view.dispatch(tr);
 
           editor.storage.aiTool.status = "idle";
           editor.storage.aiTool.diffHtml = null;
+          editor.storage.aiTool.originalText = null;
           editor.storage.aiTool.improvedText = null;
+          editor.storage.aiTool.range = null;
 
           return true;
         },
