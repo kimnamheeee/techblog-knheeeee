@@ -4,8 +4,47 @@ import { type Editor } from "@tiptap/core";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { useCallback, useState } from "react";
 import { diffToHtml } from "../../diffText";
+import { SwitchCase } from "@/shared/ui/SwitchCase";
+import { ButtonGroup } from "@/shared/ui/button-group";
+import { Button } from "@/shared/ui/button";
+import { Spinner } from "@/shared/ui/spinner";
 
 type Status = "idle" | "loading" | "result";
+
+function IdleMenu({ onImprove }: { onImprove: () => void }) {
+  return (
+    <ButtonGroup>
+      <Button variant="outline" onClick={onImprove}>
+        표현 다듬기
+      </Button>
+      <Button variant="outline">AI에게 질문하기</Button>
+    </ButtonGroup>
+  );
+}
+
+function LoadingMenu() {
+  return (
+    <div className="px-4 py-2 text-sm text-gray-500 flex gap-2 items-center bg-white border rounded-md">
+      <Spinner />
+      AI가 문장을 교정하는 중...
+    </div>
+  );
+}
+
+function ResultMenu({
+  onAccept,
+  onDiscard,
+}: {
+  onAccept: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <ButtonGroup>
+      <Button onClick={onAccept}>Accept</Button>
+      <Button onClick={onDiscard}>Discard</Button>
+    </ButtonGroup>
+  );
+}
 
 export function AIToolMenu({ editor }: { editor: Editor }) {
   const [status, setStatus] = useState<Status>("idle");
@@ -104,34 +143,17 @@ export function AIToolMenu({ editor }: { editor: Editor }) {
 
   return (
     <BubbleMenu editor={editor}>
-      {
-        {
-          idle: (
-            <div className="flex gap-2">
-              <button onClick={handleImproveClick}>표현 다듬기</button>
-              <button>AI에게 질문하기</button>
-            </div>
-          ),
-
-          loading: (
-            <div className="px-3 py-1 text-sm text-gray-500 flex items-center">
-              <span className="animate-spin border w-4 h-4 rounded-full inline-block mr-2" />
-              AI 다듬는 중...
-            </div>
-          ),
-
+      <SwitchCase
+        value={status}
+        caseBy={{
+          idle: <IdleMenu onImprove={handleImproveClick} />,
+          loading: <LoadingMenu />,
           result: (
-            <div className="flex gap-2">
-              <button onClick={handleAccept} className="text-green-600">
-                Accept
-              </button>
-              <button onClick={handleDiscard} className="text-red-600">
-                Discard
-              </button>
-            </div>
+            <ResultMenu onAccept={handleAccept} onDiscard={handleDiscard} />
           ),
-        }[status]
-      }
+        }}
+        default={<IdleMenu onImprove={handleImproveClick} />}
+      />
     </BubbleMenu>
   );
 }
