@@ -10,6 +10,7 @@ import { Button } from "@/shared/ui/button";
 import { ButtonGroup } from "@/shared/ui/button-group";
 
 import { useEditorStore } from "../model/editorStore";
+import { useSelectedText } from "../model/useSelectedText";
 
 export default function ContentEditor() {
   const { setMarkdownText } = useEditorStore();
@@ -28,12 +29,26 @@ export default function ContentEditor() {
     },
   });
 
+  const getSelectedText = useSelectedText(editor);
+
+  async function handleImproveText() {
+    const selected = getSelectedText();
+    if (!selected) return;
+
+    const res = await fetch("/api/editor/improve", {
+      method: "POST",
+      body: JSON.stringify({ text: selected }),
+    });
+    const data = await res.json();
+    console.log(data);
+  }
+
   return (
     <>
       {editor && (
         <BubbleMenu editor={editor}>
           <ButtonGroup>
-            <Button variant="outline" onClick={() => {}}>
+            <Button variant="outline" onClick={handleImproveText}>
               표현 다듬기
             </Button>
             <Button variant="outline" onClick={() => {}}>
