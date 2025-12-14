@@ -4,6 +4,7 @@ import "./globals.css";
 import "./tiptap.css";
 import Header from "@/widgets/Header";
 import { OverlayProvider } from "overlay-kit";
+import { Toaster } from "@/shared/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         >
           <Header />
           <main className="flex-1 overflow-y-auto">{children}</main>
+          <Toaster />
         </body>
       </html>
     </OverlayProvider>

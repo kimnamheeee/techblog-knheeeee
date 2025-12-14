@@ -6,6 +6,7 @@ import { SwitchCase } from "@/shared/ui/SwitchCase";
 import { IdleMenu } from "./IdleMenu";
 import { LoadingMenu } from "./LoadingMenu";
 import { ResultMenu } from "./ResultMenu";
+import { toast } from "sonner";
 
 type Status = "idle" | "loading" | "result";
 
@@ -38,6 +39,16 @@ export function AIToolMenu({ editor }: { editor: Editor }) {
 
       if (!improved) {
         setStatus("idle");
+        return;
+      }
+
+      if (improved.trim() === selected.trim()) {
+        setStatus("idle");
+        toast("수정할 내용이 없습니다.", {
+          duration: 1000,
+          position: "bottom-left",
+          className: "!bottom-20",
+        });
         return;
       }
 
