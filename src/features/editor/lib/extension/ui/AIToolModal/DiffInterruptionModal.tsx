@@ -8,11 +8,10 @@ import {
   DialogClose,
 } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
+import { overlay } from "overlay-kit";
 
-interface DiffInterruptionModalProps {
+interface DiffInterruptionModalOptions {
   reason: "cancel-generation" | "discard-result";
-  onAccept: () => void;
-  onDiscard: () => void;
 }
 
 const reasonBy = {
@@ -26,27 +25,38 @@ const reasonBy = {
   },
 };
 
-export function DiffInterruptionModal({
+export async function openDiffInterruptionModal({
   reason,
-  onAccept,
-  onDiscard,
-}: DiffInterruptionModalProps) {
-  return (
-    <Dialog>
+}: DiffInterruptionModalOptions): Promise<boolean> {
+  const result = await overlay.openAsync<boolean>(({ isOpen, close }) => (
+    <Dialog open={isOpen} onOpenChange={() => close(false)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{reasonBy[reason].title}</DialogTitle>
           <DialogDescription>{reasonBy[reason].description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button onClick={onAccept}>확인</Button>
+          <Button
+            onClick={() => {
+              close(true);
+            }}
+          >
+            확인
+          </Button>
           <DialogClose asChild>
-            <Button variant="outline" onClick={onDiscard}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                close(false);
+              }}
+            >
               취소
             </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  ));
+
+  return result;
 }
