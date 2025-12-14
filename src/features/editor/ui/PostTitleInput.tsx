@@ -7,7 +7,7 @@ interface PostTitleInputProps {
   className?: string;
 }
 
-export default function PostTitleInput({ className }: PostTitleInputProps) {
+export function PostTitleInput({ className }: PostTitleInputProps) {
   const { title, setTitle } = useEditorStore();
   return (
     <input
