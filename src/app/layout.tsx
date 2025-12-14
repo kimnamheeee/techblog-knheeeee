@@ -27,16 +27,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <OverlayProvider>
-      <html lang="ko" className="h-full">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased h-full flex flex-col`}
-        >
+    <html lang="ko" className="h-full">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full flex flex-col`}
+      >
+        <OverlayProvider>
           <Header />
           <main className="flex-1 overflow-y-auto">{children}</main>
           <Toaster />
-        </body>
-      </html>
-    </OverlayProvider>
+        </OverlayProvider>
+      </body>
+    </html>
   );
 }
